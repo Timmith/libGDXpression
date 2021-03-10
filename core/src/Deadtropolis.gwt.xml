@@ -2,4 +2,22 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit trunk//EN" "http://www.gwtproject.org/doctype/2.8.0/gwt-module.dtd">
 <module>
 	<source path="com/timmith/deadtropolis" />
+	<source path="com/timmith/deadtropolis/client" />
+	<source path="com/badlogic/gdx" />
+	<source path="org/json/JSONException" />
+
+<!--&lt;!&ndash;	<inherits name='com.badlogic.gdx.ApplicationAdapter'/>&ndash;&gt;-->
+<!--&lt;!&ndash;	<inherits name='com.badlogic.gdx.Gdx'/>&ndash;&gt;-->
+<!--&lt;!&ndash;	<inherits name='com.badlogic.gdx.graphics.GL20'/>&ndash;&gt;-->
+<!--&lt;!&ndash;	<inherits name='com.badlogic.gdx.graphics.Texture'/>&ndash;&gt;-->
+<!--&lt;!&ndash;	<inherits name='com.badlogic.gdx.graphics.g2d.SpriteBatch'/>&ndash;&gt;-->
+<!--	<inherits name='org.json.JSONException'/>-->
+<!--	<inherits name='org.json.JSONObject'/>-->
+<!--	<inherits name='java.util.concurrent.ExecutionException'/>-->
+<!--	<inherits name='java.net.URISyntaxException'/>-->
+<!--	<inherits name='io.socket.client.IO'/>-->
+<!--	<inherits name='io.socket.client.Socket'/>-->
+<!--	<inherits name='io.socket.emitter.Emitter'/>-->
+
+	<add-linker name="xsiframe" />
 </module>

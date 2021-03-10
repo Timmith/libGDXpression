@@ -37,6 +37,10 @@ const io = socketIo(server, {
 io.on("connection", (socket) => {
     console.log("New client connected");
 
+    socket.emit("socketID", { id: socket.id })
+
+    socket.broadcast.emit("newPlayer", { id: socket.id })
+
     socket.emit('init_msg', { data: 'sup bruh' });
 
     //serverTime(socket);
