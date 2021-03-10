@@ -21,6 +21,9 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public class Deadtropolis extends ApplicationAdapter {
+	private final float UPDATE_TIME = 1/60f;
+	float timer;
+
 	SpriteBatch batch;
 	private Socket socket;
 	String id;
@@ -47,7 +50,6 @@ public class Deadtropolis extends ApplicationAdapter {
 
 	public void handleInput(float dt) {
 		if (player != null){
-
 			if(Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)){
 				player.setPosition(player.getX(), player.getY() + (200 * dt));
 			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
@@ -60,12 +62,28 @@ public class Deadtropolis extends ApplicationAdapter {
 		}
 	}
 
+	public void updateServer(float dt){
+		timer =+ dt;
+		if(timer >= UPDATE_TIME && player != null && player.hasMoved()){
+			JSONObject data = new JSONObject();
+			try{
+				data.put("x", player.getX());
+				data.put("y", player.getY());
+				socket.emit("playerMoved", data);
+			}catch(JSONException e){
+				Gdx.app.log("SOCKET.IO", "Error sending update");
+
+			}
+		}
+	}
+
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(0, 0, 1, 1);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		handleInput(Gdx.graphics.getDeltaTime());
+		updateServer(Gdx.graphics.getDeltaTime());
 
 		batch.begin();
 		if (player != null){
@@ -111,10 +129,10 @@ public class Deadtropolis extends ApplicationAdapter {
 			public void call(Object... args) {
 				JSONObject data = (JSONObject) args[0];
 				try {
-					String id = data.getString("id");
-					Gdx.app.log("SocketIO", "New Player Connected: " + id);
+					String playerId = data.getString("id");
+					Gdx.app.log("SocketIO", "New Player Connected: " + playerId);
 
-					friendlyPlayers.put(id, new Citizen(playerSkin));
+					friendlyPlayers.put(playerId, new Citizen(playerSkin));
 
 				}catch(JSONException e) {
 					Gdx.app.log("SocketIO", "Error getting New Player ID");
@@ -129,6 +147,21 @@ public class Deadtropolis extends ApplicationAdapter {
 					friendlyPlayers.remove(id);
 				}catch(JSONException e) {
 					Gdx.app.log("SocketIO", "Error getting New Player ID");
+				}
+			}
+		}).on("playerMoved", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try {
+					String playerId = data.getString("id");
+					Double x = data.getDouble("x");
+					Double y = data.getDouble("y");
+					if (friendlyPlayers.get(playerId) != null){
+						friendlyPlayers.get(playerId).setPosition(x.floatValue(),y.floatValue());
+					}
+				}catch(JSONException e) {
+					Gdx.app.log("SocketIO", "Error getting a players move");
 				}
 			}
 		}).on("getPlayers", new Emitter.Listener() {

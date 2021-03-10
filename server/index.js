@@ -42,8 +42,24 @@ io.on("connection", (socket) => {
     socket.emit("socketID", { id: socket.id })
     socket.emit("getPlayers", players)
 
-
     socket.broadcast.emit("newPlayer", { id: socket.id })
+
+    socket.on("playerMoved", function(data){
+        data.id = socket.id;
+        socket.broadcast.emit("playerMoved", data);
+
+        console.log("playerMoved: " +
+                    "ID: " + data.id +
+                    "X: " + data.x +
+                    "Y: " + data.y);
+
+        for (var i = 0; i < players.length; i++){
+            if(players[i].id == data.id){
+                players[i].x = data.x;
+                players[i].y = data.y;
+            }
+        }
+    })
 
     socket.emit('init_msg', { data: 'sup bruh' });
 
