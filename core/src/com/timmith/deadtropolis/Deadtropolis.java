@@ -6,8 +6,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.timmith.deadtropolis.sprites.Citizen;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,9 +47,14 @@ public class Deadtropolis extends ApplicationAdapter {
 
 	public void handleInput(float dt) {
 		if (player != null){
-			if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+
+			if(Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)){
+				player.setPosition(player.getX(), player.getY() + (200 * dt));
+			}else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) {
+				player.setPosition(player.getX(), player.getY() + (-200 * dt));
+			}else if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)){
 				player.setPosition(player.getX() + (-200 * dt), player.getY());
-			} else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+			} else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)){
 				player.setPosition(player.getX() + (200 * dt), player.getY());
 			}
 		}
@@ -111,6 +118,35 @@ public class Deadtropolis extends ApplicationAdapter {
 
 				}catch(JSONException e) {
 					Gdx.app.log("SocketIO", "Error getting New Player ID");
+				}
+			}
+		}).on("playerDisconnect", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONObject data = (JSONObject) args[0];
+				try {
+					String id = data.getString("id");
+					friendlyPlayers.remove(id);
+				}catch(JSONException e) {
+					Gdx.app.log("SocketIO", "Error getting New Player ID");
+				}
+			}
+		}).on("getPlayers", new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				JSONArray objects = (JSONArray) args[0];
+				try{
+					for(int i = 0; i < objects.length(); i ++){
+						Citizen coopPlayer = new Citizen(playerSkin);
+						Vector2 position = new Vector2();
+						position.x = ((Double) objects.getJSONObject(i).getDouble("x")).floatValue();
+						position.y = ((Double) objects.getJSONObject(i).getDouble("y")).floatValue();
+						coopPlayer.setPosition(position.x, position.y);
+
+						friendlyPlayers.put(objects.getJSONObject(i).getString("id"), coopPlayer);
+					}
+				}catch(JSONException e){
+
 				}
 			}
 		});
